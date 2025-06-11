@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Employee Time Card</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f4;
+    }
+
+    .container {
+      width: 40%;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      box-shadow: 0 0 10px #aaa;
+      border-radius: 10px;
+    }
+
+    h2 {
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    .radio-group {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 50px;
+      margin-bottom: 10px;
+    }
+
+    .radio-group label {
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      min-width: 120px;
+    }
+
+    .radio-group input {
+      transform: scale(1.3);
+      margin-left: 5px;
+    }
+
+    .time-display {
+      font-size: 18px;
+      font-weight: bold;
+      background-color: #eee;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    .form-group {
+      text-align: left;
+      margin-bottom: 10px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    select,
+    input {
+      width: 100%;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 24px;
+    }
+
+    .btn-container {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      padding: 8px 20px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Employee Time Card</h2>
+
+    <!-- Clock In / Clock Out radio -->
+    <div class="radio-group">
+      <label>Clock In <input type="radio" name="workType" value="clockIn" checked /></label>
+      <label>Clock Out <input type="radio" name="workType" value="clockOut" /></label>
+    </div>
+
+    <!-- Current JST Time -->
+    <div class="time-display" id="currentTime"></div>
+
+    <!-- Store Name -->
+    <div class="form-group">
+      <label for="location">Store Name:</label>
+      <select id="location">
+        <option value="">Please select a store</option>
+        <option value="D-岩見沢">D-岩見沢</option>
+        <option value="D-江別">D-江別</option>
+        <option value="D-深川">D-深川</option>
+        <option value="D-千歳">D-千歳</option>
+        <option value="D-砂川">D-砂川</option>
+        <option value="D-苫小牧東">D-苫小牧東</option>
+        <option value="D-手稲">D-手稲</option>
+        <option value="D-旭川">D-旭川</option>
+        <option value="D-近文">D-近文</option>
+        <option value="D-北広島">D-北広島</option>
+        <option value="D-岩見沢南">D-岩見沢南</option>
+        <option value="D-東雁来">D-東雁来</option>
+        <option value="アネックス">アネックス</option>
+        <option value="G/G 浦河">G/G 浦河</option>
+        <option value="恵庭">恵庭</option>
+        <option value="恵-きたひろ">恵-きたひろ</option>
+        <option value="浦河">浦河</option>
+        <option value="様似">様似</option>
+        <option value="富川">富川</option>
+      </select>
+    </div>
+
+    <!-- Employee Name -->
+    <div class="form-group">
+      <label for="employeeName">Employee Name:</label>
+      <input type="text" id="employeeName" placeholder="Enter your name" required />
+    </div>
+
+    <!-- Submit Button -->
+    <div class="btn-container">
+      <button id="submitButton">Submit</button>
+    </div>
+
+    <p id="responseMessage"></p>
+  </div>
+
+  <script defer>
+    // Update JST time
+    function updateTime() {
+      const now = new Date();
+      const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+      const jstTime = new Date(utcTime + 9 * 60 * 60000);
+
+      const formattedTime =
+        jstTime.getFullYear() +
+        "-" +
+        String(jstTime.getMonth() + 1).padStart(2, "0") +
+        "-" +
+        String(jstTime.getDate()).padStart(2, "0") +
+        " " +
+        String(jstTime.getHours()).padStart(2, "0") +
+        ":" +
+        String(jstTime.getMinutes()).padStart(2, "0");
+
+      document.getElementById("currentTime").innerText = formattedTime;
+    }
+
+    setInterval(updateTime, 30000);
+    document.addEventListener("DOMContentLoaded", updateTime);
+
+    function sendData() {
+      const name = document.getElementById("employeeName").value;
+      const location = document.getElementById("location").value;
+      const action = document.querySelector('input[name="workType"]:checked').value;
+      const actionText = action === "clockIn" ? "Clock In" : "Clock Out";
+      const timestamp = document.getElementById("currentTime").innerText;
+      const responseMessage = document.getElementById("responseMessage");
+
+      if (!name || !location) {
+        alert("Please enter both your name and store name.");
+        return;
+      }
+
+      const confirmMessage = `Recorded Information:\n\n• Type: ${actionText}\n• Store: ${location}\n• Name: ${name}\n• Time: ${timestamp}\n\n✔️ Successfully recorded.`;
+      alert(confirmMessage);
+
+      console.log(`🚀 Sending data: ${actionText}, ${location}, ${name}, ${timestamp}`);
+
+      // 🔹 TODO: Replace this with actual Firebase API call
+      responseMessage.innerText = `✅ ${actionText} successfully recorded!`;
+      responseMessage.style.color = "green";
+    }
+
+    document.getElementById("submitButton").addEventListener("click", sendData);
+  </script>
+</body>
+</html>
